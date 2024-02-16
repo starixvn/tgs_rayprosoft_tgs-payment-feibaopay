@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\Tgs.Payment.FeibaoPay.props" />
-</Project>
