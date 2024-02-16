@@ -55,6 +55,7 @@ public class DepositProcessorTests
             hashIV,
             formId,
             "gcash_qr",
+            null,
             "4ucmqplxb029",
             "127.0.0.1");
 
@@ -139,6 +140,7 @@ public class DepositProcessorTests
             hashIV,
             formId,
             "gcash",
+            null,
             "4ucmqplxb029",
             "127.0.0.1");
 

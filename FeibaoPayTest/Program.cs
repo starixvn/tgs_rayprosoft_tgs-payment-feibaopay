@@ -29,7 +29,7 @@ var hashIV = "edbeaacdb228dcac";
 //代收GCash QR
 var gateway = "gcash_qr";
 
-var depositSettings = new FeibaoPayDepositSettings(merchant, hashKey, hashIV, Guid.NewGuid(), gateway, "4ucmqplxb029", "127.0.0.1");
+var depositSettings = new FeibaoPayDepositSettings(merchant, hashKey, hashIV, Guid.NewGuid(), gateway, null, "4ucmqplxb029", "127.0.0.1");
 
 var depositReturn = await paymentClient.DepositAsync(
     "tgs.payment.feibaopay.deposit",

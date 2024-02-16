@@ -4,5 +4,6 @@ public record DepositOrder(
     Guid FormId,
     Uri CallbackUrl,
     string GateWay,
+    string? BankCode,
     string PlayerCode,
     string UserIp);

@@ -7,7 +7,7 @@
 	<RootNamespace>Tgs.Payment.FeibaoPay.Client</RootNamespace>
 	<PackageId>Tgs.Payment.FeibaoPay.Client</PackageId>
 	<Title>Tgs.Payment.FeibaoPay.Client</Title>
-	<Version>0.0.1</Version>
+	<Version>0.0.2</Version>
 	<Authors>Raypro</Authors>
 	<Company>Raypro</Company>
 	<PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-payment-feibaopay</PackageProjectUrl>

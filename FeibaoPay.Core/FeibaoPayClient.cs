@@ -30,6 +30,9 @@ public class FeibaoPayClient(
             ["user_ip"] = order.UserIp,
         };
 
+        if (string.IsNullOrWhiteSpace(order.BankCode) is false)
+            dict["bank_code"] = order.BankCode;
+
         var sortDict = dict
             .OrderBy(kvp => kvp.Key, StringComparer.Ordinal)
             .Select(kvp => kvp)

@@ -6,5 +6,6 @@ public record FeibaoPayDepositSettings(
     string HashIV,
     Guid FormId,
     string GateWay,
+    string? BankCode,
     string PlayerCode,
     string UserIp);

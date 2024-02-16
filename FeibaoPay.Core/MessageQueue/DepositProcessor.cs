@@ -30,6 +30,7 @@ internal class DepositProcessor(
             settings.FormId,
             new Uri($"{_options.CallbackBaseUrl}/deposit/callback"),
             settings.GateWay,
+            settings.BankCode,
             settings.PlayerCode,
             settings.UserIp);
 
