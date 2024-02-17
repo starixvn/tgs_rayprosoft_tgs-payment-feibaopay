@@ -69,7 +69,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
             { "action", "gcash_callback" },
             { "merchant", "feibaotest" },
             { "merchant_order_num", "4f3803ab-08e4-43c9-acc3-a06fa426fb1f" },
-            { "order", "tAUAwR76Lcu7BjQ5gGANlYl7PHmAJjbWtxtemZNUMrHh56R9dD0Nc4EOYMQQ%0AtTIMguTe5SLuAgSlanI2UD40XbKOtBNFTY8DGivWvgpFGv5MOsLXK%2BGeiiIu%0AhaKSKbDiuTLBrYCRdGxsf2nZuW0XYEBrMRJ7AIBoFi0p9vQbt%2BWNsknD0NRD%0A9BcCzSH5911aA%2B%2FrgWcnkKSpMyWTp5uh%2FAaB9wBKVWdfnXtm4AWJdw2iq5qt%0AS9DXFrQAMwaRU3N9Vy7cVo9c%2B3YdcFp687MYig%3D%3D%0A" }
+            { "order", "tAUAwR76Lcu7BjQ5gGANlYl7PHmAJjbWtxtemZNUMrHh56R9dD0Nc4EOYMQQtTIMguTe5SLuAgSlanI2UD40XbKOtBNFTY8DGivWvgpFGv5MOsLXK+GeiiIuhaKSKbDiuTLBrYCRdGxsf2nZuW0XYEBrMRJ7AIBoFi0p9vQbt+WNsknD0NRD9BcCzSH5911aA+/rgWcnkKSpMyWTp5uh/AaB9wBKVWdfnXtm4AWJdw2iq5qtS9DXFrQAMwaRU3N9Vy7cVo9c+3YdcFp687MYig==" }
         };
 
         var content = new FormUrlEncodedContent(request);
@@ -157,7 +157,7 @@ public class WithdrawTests(ITestOutputHelper testOutputHelper)
             { "action", "gcash_callback" },
             { "merchant", "feibaotest" },
             { "merchant_order_num", "97e075a8-84b9-4822-bd41-a68d50441863" },
-            { "order", "tAUAwR76Lcu7BjQ5gGANlYl7PHmAJjbWtxtemZNUMrHh56R9dD0Nc4EOYMQQ%5CntTIMr0XUevoyXrvpd3%2FVpDjtqYMX0SLidyNV%2FbkWlVqkiKGEQynZY1AJ8xHi%5CnnZ9mMicFdSftB7SuyXrcZFJIrXrVU0iN4ul8vo3iCHIaN10izM2dAbzf54JE%5CnwA5I5QsR2Ek%2Fan7CZpio1WfGpGnkSWCKCQTICxw%2Bj%2Bz8wDIkbu9wAZbP3lAp%5Cn8eG01L%2B8q880VWPy3w7labpSBffoON00ggR6vnOziLOf8WXEx7eKxgCWkz52%5Cnord1m4%2FvkE9rY1FhSPoX%5Cn" }
+            { "order", "tAUAwR76Lcu7BjQ5gGANlYl7PHmAJjbWtxtemZNUMrHh56R9dD0Nc4EOYMQQtTIMr0XUevoyXrvpd3/VpDjtqYMX0SLidyNV/bkWlVqkiKGEQynZY1AJ8xHinZ9mMicFdSftB7SuyXrcZFJIrXrVU0iN4ul8vo3iCHIaN10izM2dAbzf54JEwA5I5QsR2Ek/an7CZpio1WfGpGnkSWCKCQTICxw+j+z8wDIkbu9wAZbP3lAp8eG01L+8q880VWPy3w7labpSBffoON00ggR6vnOziLOf8WXEx7eKxgCWkz52ord1m4/vkE9rY1FhSPoX" }
         };
 
         var content = new FormUrlEncodedContent(request);

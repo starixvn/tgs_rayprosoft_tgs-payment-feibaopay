@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Net.Mime;
+﻿using System.Net.Mime;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
@@ -41,12 +40,10 @@ public class DepositController(ILogger<DepositController> logger) : ControllerBa
 
         var sourceOrder = source.Order;
 
-        var originSource = WebUtility.UrlDecode(sourceOrder).Replace(@"\n", "");
-
         var hashKey = depositForm.ApplyInfo!.Settings.HashKey;
         var hashIV = depositForm.ApplyInfo!.Settings.HashIV;
 
-        var orderDecryptJson = cryptor.AesDecrypt(originSource, hashKey, hashIV);
+        var orderDecryptJson = cryptor.AesDecrypt(sourceOrder, hashKey, hashIV);
 
         var order = JsonSerializer.Deserialize<CallbackDepositOrder>(orderDecryptJson)!;
 

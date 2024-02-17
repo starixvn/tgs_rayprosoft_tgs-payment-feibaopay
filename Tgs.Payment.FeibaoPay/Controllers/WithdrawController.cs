@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Net.Mime;
+﻿using System.Net.Mime;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
@@ -39,12 +38,11 @@ public class WithdrawController(ILogger<WithdrawController> logger) : Controller
         }
 
         var sourceOrder = source.Order;
-        var originSource = WebUtility.UrlDecode(sourceOrder).Replace(@"\n", "");
 
         var hashKey = withdrawForm.ApplyInfo!.Settings.HashKey;
         var hashIV = withdrawForm.ApplyInfo!.Settings.HashIV;
 
-        var orderDecryptJson = cryptor.AesDecrypt(originSource, hashKey, hashIV);
+        var orderDecryptJson = cryptor.AesDecrypt(sourceOrder, hashKey, hashIV);
 
         var order = JsonSerializer.Deserialize<CallbackWithdrawOrder>(orderDecryptJson)!;
 
