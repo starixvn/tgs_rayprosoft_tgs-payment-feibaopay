@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	<TargetFramework>net8.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
 	<RootNamespace>Tgs.Payment.FeibaoPay.Client</RootNamespace>
 	<PackageId>Tgs.Payment.FeibaoPay.Client</PackageId>
 	<Title>Tgs.Payment.FeibaoPay.Client</Title>
@@ -14,5 +14,9 @@
 	<RepositoryUrl>https://gitlab.com/rayprosoft/tgs-payment-feibaopay</RepositoryUrl>
 	<PackageTags>Tgs Payment FeibaoPay</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+	<PackageReference Include="AsyncMethodNameFixer" Version="2.3.0" />
+  </ItemGroup>
 
 </Project>
