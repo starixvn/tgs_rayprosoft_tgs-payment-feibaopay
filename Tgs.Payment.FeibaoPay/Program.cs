@@ -1,4 +1,5 @@
-﻿using FluentdForward.OpenTelemetry.MessagePack;
+﻿using System.Diagnostics;
+using FluentdForward.OpenTelemetry.MessagePack;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Options;
 using NATS.Client.Core;
@@ -73,7 +74,10 @@ var builder = WebApplication.CreateBuilder(args);
                 ProcessorTypes.DepositTimeoutCheckHandlerType,
                 $"tgs.payment.feibaopay.deposit.schedule.reject",
                 $"tgs.payment.feibaopay.deposit.schedule.reject")
-            )
+            .AddProcessor(
+                ProcessorTypes.GetBalanceProcessorType,
+                "tgs.payment.feibaopay.balance",
+                "tgs.payment.feibaopay.balance"))
         .AddNatsGlobPatternExchange("*");
 
     var excludeExtensions = new[] { "html", "ico", "png", "jpg" };

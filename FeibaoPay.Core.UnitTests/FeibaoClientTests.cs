@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
@@ -158,6 +159,7 @@ public class FeibaoClientTests
 
         var sut = new FeibaoPayClient(httpClient, cryptor, fakeTimeProvider, NullLogger<FeibaoPayClient>.Instance);
 
+        var merchant = "feibaotest";
         var hashKey = "a8ec90c269c3bd8812739a4d710bbb85";
         var hashIV = "edbeaacdb228dcac";
 
@@ -193,31 +195,31 @@ public class FeibaoClientTests
                     }
                 }
                 """));
-        var merchant = "feibaotest";
-
-        var actual = await sut.QueryBalanceAsync(merchant, hashKey, hashIV, Array.Empty<string>());
-
+        
         var expected = JsonNode.Parse("""
             {
-                "bank": "230302.0",
-                "bank_qr": "0.0",
-                "coinsph": "0.0",
-                "credit_card": "0.0",
-                "cstore": "0.0",
-                "gcash": "94899.6",
-                "gcash_qr": "142983.4",
-                "gcash_vivamax": "0.0",
-                "grabpay": "567533.0",
-                "grabpay_qr": "0.0",
-                "paymaya": "1150508.0",
-                "paymaya_qr": "0.0",
-                "paypal": "0.0",
-                "qrph": "0.0",
-                "remit": "0.0",
-                "rusty_p2p": "0.0"
+                "bank": 230302.0,
+                "bank_qr": 0.0,
+                "coinsph": 0.0,
+                "credit_card": 0.0,
+                "cstore": 0.0,
+                "gcash": 94899.6,
+                "gcash_qr": 142983.4,
+                "gcash_vivamax": 0.0,
+                "grabpay": 567533.0,
+                "grabpay_qr": 0.0,
+                "paymaya": 1150508.0,
+                "paymaya_qr": 0.0,
+                "paypal": 0.0,
+                "qrph": 0.0,
+                "remit": 0.0,
+                "rusty_p2p": 0.0
             }
             """);
 
-        Assert.Equal(expected!.ToJsonString(), actual.ToJsonString());
+        var actual = await sut.QueryBalanceAsync(merchant, hashKey, hashIV, Array.Empty<string>());
+
+        Assert.NotNull(actual);
+        Assert.Equal(expected!.ToJsonString(), JsonSerializer.Serialize(actual));
     }
 }

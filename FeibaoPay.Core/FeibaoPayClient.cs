@@ -11,11 +11,12 @@ public class FeibaoPayClient(
     TimeProvider timeProvider,
     ILogger<FeibaoPayClient> logger)
 {
-    private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-    private readonly FeibaoPayCryptor _cryptor = cryptor ?? throw new ArgumentNullException(nameof(cryptor));
-    private readonly ILogger<FeibaoPayClient> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-    public async ValueTask<FeibaoPayClientDepositResponse> DepositAsync(string merchant, string hashKey, string hashIV, DepositOrder order, CancellationToken cancellationToken = default)
+    public async ValueTask<FeibaoPayClientDepositResponse> DepositAsync(
+        string merchant,
+        string hashKey,
+        string hashIV,
+        DepositOrder order,
+        CancellationToken cancellationToken = default)
     {
         var dict = new Dictionary<string, string?>
         {
@@ -39,7 +40,7 @@ public class FeibaoPayClient(
             .ToDictionary();
 
         var source = JsonSerializer.Serialize(sortDict);
-        var encryptData = _cryptor.AesEncrypt(source, hashKey, hashIV);
+        var encryptData = cryptor.AesEncrypt(source, hashKey, hashIV);
 
         var request = new
         {
@@ -47,7 +48,7 @@ public class FeibaoPayClient(
             data = encryptData
         };
 
-        var response = await _httpClient
+        var response = await httpClient
             .PostAsJsonAsync("/v3/deposit", request, cancellationToken)
             .ConfigureAwait(false);
 
@@ -55,7 +56,7 @@ public class FeibaoPayClient(
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation("FeibaoPayClient Deposit Body:{body}", body);
+        logger.LogInformation("FeibaoPayClient Deposit Body:{body}", body);
 
         var node = JsonNode.Parse(body) ?? throw new ApiFailException("Deposit response can't read.");
 
@@ -63,7 +64,7 @@ public class FeibaoPayClient(
             throw new ApiFailException(string.Format("message:{0}", node["msg"]!.ToString()));
 
         var encryptOrder = node["order"]!.GetValue<string>();
-        var decryptOrder = _cryptor.AesDecrypt(encryptOrder, hashKey, hashIV);
+        var decryptOrder = cryptor.AesDecrypt(encryptOrder, hashKey, hashIV);
 
         var nodeOrder = JsonNode.Parse(decryptOrder) ?? throw new ApiFailException("Deposit response order can't read.");
 
@@ -74,7 +75,12 @@ public class FeibaoPayClient(
             RedirectUrl: new Uri(nodeOrder["navigate_url"]!.GetValue<string>()));
     }
 
-    public async ValueTask<FeibaoPayClientWithdrawResponse> WithdrawAsync(string merchant, string hashKey, string hashIV, WithdrawOrder order, CancellationToken cancellationToken = default)
+    public async ValueTask<FeibaoPayClientWithdrawResponse> WithdrawAsync(
+        string merchant,
+        string hashKey,
+        string hashIV,
+        WithdrawOrder order,
+        CancellationToken cancellationToken = default)
     {
         var dict = new Dictionary<string, string?>
         {
@@ -100,7 +106,7 @@ public class FeibaoPayClient(
             .ToDictionary();
 
         var source = JsonSerializer.Serialize(sortDict);
-        var encryptData = _cryptor.AesEncrypt(source, hashKey, hashIV);
+        var encryptData = cryptor.AesEncrypt(source, hashKey, hashIV);
 
         var request = new
         {
@@ -108,7 +114,7 @@ public class FeibaoPayClient(
             data = encryptData
         };
 
-        var response = await _httpClient
+        var response = await httpClient
             .PostAsJsonAsync("/v3/withdraw", request, cancellationToken)
             .ConfigureAwait(false);
 
@@ -116,7 +122,7 @@ public class FeibaoPayClient(
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation("FeibaoPayClient Withdraw Body:{body}", body);
+        logger.LogInformation("FeibaoPayClient Withdraw Body:{body}", body);
 
         var node = JsonNode.Parse(body) ?? throw new ApiFailException("Withdraw response can't read.");
 
@@ -124,7 +130,7 @@ public class FeibaoPayClient(
             throw new ApiFailException(string.Format("message:{0}", node["msg"]!.ToString()));
 
         var encryptOrder = node["order"]!.GetValue<string>();
-        var decryptOrder = _cryptor.AesDecrypt(encryptOrder, hashKey, hashIV);
+        var decryptOrder = cryptor.AesDecrypt(encryptOrder, hashKey, hashIV);
 
         var nodeOrder = JsonNode.Parse(decryptOrder) ?? throw new ApiFailException("Withdraw response order can't read.");
 
@@ -148,7 +154,7 @@ public class FeibaoPayClient(
             .ToDictionary();
 
         var source = JsonSerializer.Serialize(sortDict);
-        var encryptData = _cryptor.AesEncrypt(source, hashKey, hashIV);
+        var encryptData = cryptor.AesEncrypt(source, hashKey, hashIV);
 
         var request = new
         {
@@ -156,7 +162,7 @@ public class FeibaoPayClient(
             data = encryptData
         };
 
-        var response = await _httpClient
+        var response = await httpClient
             .PostAsJsonAsync("/v3/check", request, cancellationToken)
             .ConfigureAwait(false);
 
@@ -164,7 +170,7 @@ public class FeibaoPayClient(
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation("FeibaoPayClient Query Deposit Form Status Body:{body}", body);
+        logger.LogInformation("FeibaoPayClient Query Deposit Form Status Body:{body}", body);
 
         var node = JsonNode.Parse(body) ?? throw new ApiFailException("Query Deposit Form Status response can't read.");
 
@@ -172,14 +178,19 @@ public class FeibaoPayClient(
             throw new ApiFailException(string.Format("message:{0}", node["msg"]!.ToString()));
 
         var encryptOrder = node["order"]!.GetValue<string>();
-        var decryptOrder = _cryptor.AesDecrypt(encryptOrder, hashKey, hashIV);
+        var decryptOrder = cryptor.AesDecrypt(encryptOrder, hashKey, hashIV);
 
         var nodeOrder = JsonNode.Parse(decryptOrder) ?? throw new ApiFailException("Query Deposit Form Status response order can't read.");
 
         return nodeOrder["status"]!.GetValue<string>();
     }
 
-    public async ValueTask<JsonObject> QueryBalanceAsync(string merchant, string hashKey, string hashIV, IEnumerable<string> gateWays, CancellationToken cancellationToken = default)
+    public async ValueTask<IReadOnlyDictionary<string, decimal>> QueryBalanceAsync(
+        string merchant,
+        string hashKey,
+        string hashIV,
+        IEnumerable<string> gateWays,
+        CancellationToken cancellationToken = default)
     {
         var gateways = gateWays.Any() ? gateWays.ToArray() : Array.Empty<string>();
 
@@ -195,7 +206,7 @@ public class FeibaoPayClient(
             .ToDictionary();
 
         var source = JsonSerializer.Serialize(sortDict);
-        var encryptData = _cryptor.AesEncrypt(source, hashKey, hashIV);
+        var encryptData = cryptor.AesEncrypt(source, hashKey, hashIV);
 
         var request = new
         {
@@ -203,7 +214,7 @@ public class FeibaoPayClient(
             data = encryptData
         };
 
-        var response = await _httpClient
+        var response = await httpClient
             .PostAsJsonAsync("/v3/balance", request, cancellationToken)
             .ConfigureAwait(false);
 
@@ -211,12 +222,15 @@ public class FeibaoPayClient(
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation("FeibaoPayClient Query Balance Body:{body}", body);
+        logger.LogInformation("FeibaoPayClient Query Balance Body:{body}", body);
 
         var node = JsonNode.Parse(body) ?? throw new ApiFailException("Query Balance response can't read.");
 
         return node["code"]!.GetValue<int>() != 0
             ? throw new ApiFailException(string.Format("message:{0}", node["msg"]!.ToString()))
-            : node["wallets"]!.AsObject();
+            : node["wallets"].Deserialize<IReadOnlyDictionary<string, string>>()!
+                .ToDictionary(
+                    p => p.Key,
+                    p => decimal.Parse(p.Value));
     }
 }
