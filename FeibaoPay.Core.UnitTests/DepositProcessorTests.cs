@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text.Json;
-using Google.Protobuf;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -79,9 +78,8 @@ public class DepositProcessorTests
                 """));
 
         // Act
-        var actual = await sut.HandleAsync(request.ToByteArray());
-        var response = DepositResponse.Parser.ParseFrom(actual.Span);
-        var applyInfo = JsonSerializer.Deserialize<FeibaoPayDepositApplyInfo>(response.Result, FeibaoPayUtility.SerializerOptions);
+        var actual = await sut.HandleAsync("test", request, null);
+        var applyInfo = JsonSerializer.Deserialize<FeibaoPayDepositApplyInfo>(actual.Result, FeibaoPayUtility.SerializerOptions);
 
         // Assert
         _ = fakePaymentClient.Received(1)
@@ -164,9 +162,8 @@ public class DepositProcessorTests
                 """));
 
         // Act
-        var actual = await sut.HandleAsync(request.ToByteArray());
-        var response = DepositResponse.Parser.ParseFrom(actual.Span);
-        var applyInfo = JsonSerializer.Deserialize<FeibaoPayDepositApplyInfo>(response.Result, FeibaoPayUtility.SerializerOptions);
+        var actual = await sut.HandleAsync("test", request, null);
+        var applyInfo = JsonSerializer.Deserialize<FeibaoPayDepositApplyInfo>(actual.Result, FeibaoPayUtility.SerializerOptions);
 
         // Assert
         _ = fakePaymentClient.Received(1)

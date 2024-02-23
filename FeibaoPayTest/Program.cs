@@ -2,16 +2,25 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NATS.Client.Core;
+using Tgs.MessageQueue.Nats.Serializers;
 using Tgs.Payment.Clients;
 using Tgs.Payment.FeibaoPay.Client;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
+    .AddKeyedSingleton(
+        "Nats",
+        (sp, _) => new NatsConnection(NatsOpts.Default with
+        {
+            Url = "nats://localhost:4222",
+            SerializerRegistry = TgsNatsSerializerRegistration.Default
+        }))
     .AddPaymentClient()
-    .AddPhoenixToolkitsMessageQueue()
+    .AddMessageQueue()
     .AddNatsMessageQueue(natsConfig => natsConfig
-        .ConfigQueueOptions((opt, _) => opt.Url = "nats://localhost:4222"))
+        .ConfigureResolveConnection(sp => sp.GetRequiredKeyedService<NatsConnection>("Nats")))
     .AddNatsGlobPatternExchange("*");
 
 var app = builder.Build();

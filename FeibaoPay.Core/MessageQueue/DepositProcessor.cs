@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Google.Protobuf;
 using Microsoft.Extensions.Options;
 using Tgs.Payment.Clients;
 using Tgs.Payment.FeibaoPay.Client;
@@ -11,22 +10,23 @@ namespace Tgs.Payment.FeibaoPay.MessageQueue;
 internal class DepositProcessor(
     FeibaoPayClient feibaoPayClient,
     IPaymentClient paymentClient,
-    IOptions<FeibaoPayOptions> optionsAccessor) : IMessageProcessor
+    IOptions<FeibaoPayOptions> optionsAccessor)
+    : IMessageProcessor<DepositRequest, DepositResponse>
 {
-    private readonly FeibaoPayClient _feibaoPayClient = feibaoPayClient ?? throw new ArgumentNullException(nameof(feibaoPayClient));
-    private readonly IPaymentClient _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
     private readonly FeibaoPayOptions _options = optionsAccessor.Value;
 
-    public async ValueTask<ReadOnlyMemory<byte>> HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    public async ValueTask<DepositResponse> HandleAsync(
+        string subject,
+        DepositRequest data,
+        IEnumerable<MessageHeaderValue>? headerValues,
+        CancellationToken cancellationToken = default)
     {
-        var request = DepositRequest.Parser.ParseFrom(data.Span);
-
         var settings = JsonSerializer.Deserialize<FeibaoPayDepositSettings>(
-            request.ApplyInfo,
+            data.ApplyInfo,
             FeibaoPayUtility.SerializerOptions)!;
 
         var order = new DepositOrder(
-            decimal.Parse(request.Amount),
+            decimal.Parse(data.Amount),
             settings.FormId,
             new Uri($"{_options.CallbackBaseUrl}/deposit/callback"),
             settings.GateWay,
@@ -34,7 +34,7 @@ internal class DepositProcessor(
             settings.PlayerCode,
             settings.UserIp);
 
-        var depositResponse = await _feibaoPayClient.DepositAsync(
+        var depositResponse = await feibaoPayClient.DepositAsync(
             settings.Merchant,
             settings.HashKey,
             settings.HashIV,
@@ -49,17 +49,15 @@ internal class DepositProcessor(
                 depositResponse.RedirectUrl,
                 depositResponse.ThirdPartyOrderNo));
 
-        await _paymentClient.ScheduleAsync(
+        await paymentClient.ScheduleAsync(
             "tgs.payment.feibaopay.deposit.schedule.reject",
             settings.FormId,
             DateTime.UtcNow.AddMinutes(60D),
             cancellationToken).ConfigureAwait(false);
 
-        var msg = new DepositResponse
+        return new DepositResponse
         {
             Result = JsonSerializer.Serialize(applyInfo, FeibaoPayUtility.SerializerOptions)
         };
-
-        return msg.ToByteArray();
     }
 }

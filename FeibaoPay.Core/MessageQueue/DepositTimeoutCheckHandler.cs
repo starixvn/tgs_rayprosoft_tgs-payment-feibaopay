@@ -12,41 +12,38 @@ internal class DepositTimeoutCheckHandler(
     FeibaoPayClient feibaoPayClient,
     IPaymentClient paymentClient,
     ILogger<DepositTimeoutCheckHandler> logger)
-    : IMessageHandler
+    : IMessageHandler<ScheduleRequest>
 {
-    private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-    private readonly FeibaoPayClient _feibaoPayClient = feibaoPayClient ?? throw new ArgumentNullException(nameof(feibaoPayClient));
-    private readonly IPaymentClient _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
-    private readonly ILogger<DepositTimeoutCheckHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-    public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    public async ValueTask HandleAsync(
+        string subject,
+        ScheduleRequest data,
+        IEnumerable<MessageHeaderValue>? headerValues,
+        CancellationToken cancellationToken = default)
     {
-        var request = ScheduleRequest.Parser.ParseFrom(data.Span);
+        logger.LogInformation(
+            "Deposit Schedule Handler Receive request Form Id:{FormId}, "
+                + "Schedule Time:{ScheduleTime:yyyy/MM/dd HH:mm:ss}",
+            data.FormId.ToGuid(),
+            data.ScheduleTime.ToDateTime());
 
-        _logger.LogInformation(
-            "Deposit Schedule Handler Receive request Form Id:{request.FormId.ToGuid()}, "
-                + "Schedule Time:{request.ScheduleTime.ToDateTime():yyyy/MM/dd HH:mm:ss}",
-            request.FormId.ToGuid(),
-            request.ScheduleTime.ToDateTime());
-
-        var formId = request.FormId.ToGuid();
+        var formId = data.FormId.ToGuid();
 
         try
         {
-            var depositForm = await _paymentServiceClient
+            var depositForm = await paymentServiceClient
                 .GetDepositFormAsync(formId, cancellationToken)
                 .ConfigureAwait(false);
 
             if (depositForm is null)
             {
-                _logger.LogWarning("Deposit Form {request.FormId.ToGuid()} not found.", request.FormId.ToGuid());
+                logger.LogWarning("Deposit Form {FormId} not found.", data.FormId.ToGuid());
                 return;
             }
 
             var brandId = depositForm.BrandId;
 
-            _logger.LogInformation(
-                "GetDepositFormAsync Form Id:{depositForm.Id}, Brand Id:{brandId}, Status:{depositForm.Status}",
+            logger.LogInformation(
+                "GetDepositFormAsync Form Id:{DepositFormId}, Brand Id:{BrandId}, Status:{Status}",
                 depositForm.Id,
                 brandId,
                 depositForm.Status);
@@ -56,7 +53,7 @@ internal class DepositTimeoutCheckHandler(
 
             var applyInfo = JsonSerializer.Deserialize<FeibaoPayDepositApplyInfo>(depositForm.ApplyInfo!, FeibaoPayUtility.SerializerOptions)!;
 
-            var result = await _feibaoPayClient.QueryDepositFormStatusAsync(
+            var result = await feibaoPayClient.QueryDepositFormStatusAsync(
                 applyInfo.Settings.Merchant,
                 applyInfo.Settings.HashKey,
                 applyInfo.Settings.HashIV,
@@ -71,27 +68,27 @@ internal class DepositTimeoutCheckHandler(
                 {
                     await fsm.FireAsync(PaymentTrigger.Reject).ConfigureAwait(false);
 
-                    await _paymentClient
+                    await paymentClient
                         .RejectDepositAsync(formId, brandId, cancellationToken)
                         .ConfigureAwait(false);
                 }
             }
             else if (result is "waiting")
-                await _paymentClient.ScheduleAsync(
+                await paymentClient.ScheduleAsync(
                     "tgs.payment.feibaopay.deposit.schedule.reject",
                     formId,
                     DateTime.UtcNow.AddMinutes(10D),
                     cancellationToken).ConfigureAwait(false);
             else if (result is "success" or "success_done")
-                _logger.LogInformation("Query Deposit Form Status formId:{formId}, state:{state}", formId, result);
+                logger.LogInformation("Query Deposit Form Status formId:{formId}, state:{state}", formId, result);
             else
-                _logger.LogWarning("Query Deposit Form Status formId:{formId}, state:{state}", formId, result);
+                logger.LogWarning("Query Deposit Form Status formId:{formId}, state:{state}", formId, result);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Process deposit timeout error!");
+            logger.LogError(ex, "Process deposit timeout error!");
 
-            await _paymentClient.ScheduleAsync(
+            await paymentClient.ScheduleAsync(
                 "tgs.payment.feibaopay.deposit.schedule.reject",
                 formId,
                 DateTime.UtcNow.AddMinutes(10D),

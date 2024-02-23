@@ -85,7 +85,7 @@ public class DepositTimeoutCheckHandlerTests
                 """));
 
         // Act
-        await sut.HandleAsync(request.ToByteArray());
+        await sut.HandleAsync("test", request, null);
 
         // Assert
         _ = fakePaymentClient.Received(0)

@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Google.Protobuf;
 using Microsoft.Extensions.Options;
 using Tgs.Payment.Clients;
 using Tgs.Payment.FeibaoPay.Client;
@@ -11,20 +10,22 @@ namespace Tgs.Payment.FeibaoPay.MessageQueue;
 internal class WithdrawProcessor(
     FeibaoPayClient feibaoPayClient,
     IPaymentClient paymentClient,
-    IOptions<FeibaoPayOptions> optionsAccessor) : IMessageProcessor
+    IOptions<FeibaoPayOptions> optionsAccessor)
+    : IMessageProcessor<WithdrawRequest, WithdrawResponse>
 {
-    private readonly FeibaoPayClient _feibaoPayClient = feibaoPayClient ?? throw new ArgumentNullException(nameof(feibaoPayClient));
-    private readonly IPaymentClient _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
     private readonly FeibaoPayOptions _options = optionsAccessor.Value;
 
-    public async ValueTask<ReadOnlyMemory<byte>> HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
+    public async ValueTask<WithdrawResponse> HandleAsync(
+        string subject,
+        WithdrawRequest data,
+        IEnumerable<MessageHeaderValue>? headerValues,
+        CancellationToken cancellationToken = default)
     {
-        var request = WithdrawRequest.Parser.ParseFrom(data.Span);
-        var settings = JsonSerializer.Deserialize<FeibaoPayWithdrawSettings>(request.ApplyInfo, FeibaoPayUtility.SerializerOptions)!;
+        var settings = JsonSerializer.Deserialize<FeibaoPayWithdrawSettings>(data.ApplyInfo, FeibaoPayUtility.SerializerOptions)!;
 
         var order = new WithdrawOrder(
             settings.FormId,
-            decimal.Parse(request.Amount),
+            decimal.Parse(data.Amount),
             new Uri($"{_options.CallbackBaseUrl}/withdraw/callback"),
             settings.BankCode,
             settings.CardHolder,
@@ -33,7 +34,7 @@ internal class WithdrawProcessor(
             settings.UserId,
             settings.UserIp);
 
-        var withdrawResponse = await _feibaoPayClient.WithdrawAsync(
+        var withdrawResponse = await feibaoPayClient.WithdrawAsync(
             settings.Merchant,
             settings.HashKey,
             settings.HashIV,
@@ -43,16 +44,14 @@ internal class WithdrawProcessor(
             settings,
             new FeibaoPayWithdrawResponse(withdrawResponse.FormId));
 
-        await _paymentClient.SaveWithdrawFormThirdPartyOrderNoAsync(
+        await paymentClient.SaveWithdrawFormThirdPartyOrderNoAsync(
             settings.FormId,
             withdrawResponse.ThirdPartyOrderNo,
             cancellationToken);
 
-        var msg = new WithdrawResponse
+        return new WithdrawResponse
         {
             Result = JsonSerializer.Serialize(applyInfo, FeibaoPayUtility.SerializerOptions)
         };
-
-        return msg.ToByteArray();
     }
 }
