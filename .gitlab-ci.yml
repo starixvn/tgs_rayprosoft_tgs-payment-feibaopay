@@ -21,7 +21,7 @@ build-code:
   extends: .build-code-template
 
 unit-test:
-  extends: .unit-test-template  
+  extends: .unit-test-template
 
 push-nuget:
   extends: .push-nuget-template
@@ -32,20 +32,9 @@ push-nuget:
       - FeibaoPay.Client/bin/$BuildConfiguration/*.nupkg
 
 push-docker-image:
-  stage: publish
-  needs:
-    - build-code      
-    - unit-test
-  only:
-    - main
-  cache:
-    key: Tgs.Payment.FeibaoPay.$CI_PIPELINE_ID
-    untracked: true
-    policy: pull
+  extends: .push-docker-image-template
   script:
-    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
-    - docker build --build-arg $BuildConfiguration -f Tgs.Payment.FeibaoPay/Dockerfile -t $ImageName:$Tag . --no-cache
-    - docker push $ImageName:$Tag
+    - push_docker 'Tgs.Payment.FeibaoPay' $ImageName $Tag
 
 push-k8s-template:
   extends: .push-k8s-template

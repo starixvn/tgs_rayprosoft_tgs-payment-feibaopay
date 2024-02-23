@@ -1,8 +1,5 @@
 ﻿namespace Tgs.Payment.FeibaoPay;
 
-public class ApiFailException : Exception
+public class ApiFailException(string? message) : Exception(message)
 {
-    public ApiFailException(string? message) : base(message)
-    {
-    }
 }
