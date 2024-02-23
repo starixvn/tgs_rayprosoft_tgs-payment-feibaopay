@@ -8,6 +8,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AsyncMethodNameFixer" Version="2.3.0" />
 		<PackageReference Include="PhoenixToolkits.MessageQueue.Nats" Version="2.1.2" />
 		<PackageReference Include="Tgs.MessageQueue.Nats.Serializers" Version="0.0.2" />
 		<PackageReference Include="Tgs.Payment.Client" Version="0.6.5" />

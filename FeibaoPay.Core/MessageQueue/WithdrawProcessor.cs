@@ -47,7 +47,7 @@ internal class WithdrawProcessor(
         await paymentClient.SaveWithdrawFormThirdPartyOrderNoAsync(
             settings.FormId,
             withdrawResponse.ThirdPartyOrderNo,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         return new WithdrawResponse
         {
