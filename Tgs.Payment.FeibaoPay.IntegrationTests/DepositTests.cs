@@ -100,5 +100,4 @@ public class DepositTests(ITestOutputHelper testOutputHelper)
                 Arg.Is(paymentReturn.OrderAmount),
                 Arg.Any<CancellationToken>());
     }
-    
 }

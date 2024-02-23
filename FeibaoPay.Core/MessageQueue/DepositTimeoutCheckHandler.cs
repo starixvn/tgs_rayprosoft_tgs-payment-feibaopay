@@ -7,24 +7,17 @@ using Valhalla.MessageQueue;
 
 namespace Tgs.Payment.FeibaoPay.MessageQueue;
 
-internal class DepositTimeoutCheckHandler : IMessageHandler
+internal class DepositTimeoutCheckHandler(
+    IPaymentServiceClient paymentServiceClient,
+    FeibaoPayClient feibaoPayClient,
+    IPaymentClient paymentClient,
+    ILogger<DepositTimeoutCheckHandler> logger)
+    : IMessageHandler
 {
-    private readonly IPaymentServiceClient _paymentServiceClient;
-    private readonly FeibaoPayClient _feibaoPayClient;
-    private readonly IPaymentClient _paymentClient;
-    private readonly ILogger<DepositTimeoutCheckHandler> _logger;
-
-    public DepositTimeoutCheckHandler(
-        IPaymentServiceClient paymentServiceClient,
-        FeibaoPayClient feibaoPayClient,
-        IPaymentClient paymentClient,
-        ILogger<DepositTimeoutCheckHandler> logger)
-    {
-        _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-        _feibaoPayClient = feibaoPayClient ?? throw new ArgumentNullException(nameof(feibaoPayClient));
-        _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly IPaymentServiceClient _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+    private readonly FeibaoPayClient _feibaoPayClient = feibaoPayClient ?? throw new ArgumentNullException(nameof(feibaoPayClient));
+    private readonly IPaymentClient _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
+    private readonly ILogger<DepositTimeoutCheckHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
     {

@@ -215,9 +215,8 @@ public class FeibaoPayClient(
 
         var node = JsonNode.Parse(body) ?? throw new ApiFailException("Query Balance response can't read.");
 
-        if (node["code"]!.GetValue<int>() != 0)
-            throw new ApiFailException(string.Format("message:{0}", node["msg"]!.ToString()));
-
-        return node["wallets"]!.AsObject();
+        return node["code"]!.GetValue<int>() != 0
+            ? throw new ApiFailException(string.Format("message:{0}", node["msg"]!.ToString()))
+            : node["wallets"]!.AsObject();
     }
 }
