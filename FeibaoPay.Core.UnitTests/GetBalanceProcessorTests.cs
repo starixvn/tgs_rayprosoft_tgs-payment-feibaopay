@@ -17,7 +17,7 @@ namespace FeibaoPay.Core.UnitTests;
 public class GetBalanceProcessorTests
 {
     [Fact]
-    public async Task GetBalanceProcessor_取得商戶餘額()
+    public async Task GetBalanceProcessor_取得商戶餘額_指定gateWay()
     {
         // Arrange
         var mockHttp = new MockHttpMessageHandler();
@@ -62,22 +62,7 @@ public class GetBalanceProcessorTests
                     "code": 0,
                     "action": "balance",
                     "wallets": {
-                        "bank": "230302.0",
-                        "bank_qr": "0.0",
-                        "coinsph": "0.0",
-                        "credit_card": "0.0",
-                        "cstore": "0.0",
-                        "gcash": "94899.6",
-                        "gcash_qr": "142983.4",
-                        "gcash_vivamax": "0.0",
-                        "grabpay": "567533.0",
-                        "grabpay_qr": "0.0",
-                        "paymaya": "1150508.0",
-                        "paymaya_qr": "0.0",
-                        "paypal": "0.0",
-                        "qrph": "0.0",
-                        "remit": "0.0",
-                        "rusty_p2p": "0.0"
+                        "gcash": "94899.6"
                     }
                 }
                 """));
