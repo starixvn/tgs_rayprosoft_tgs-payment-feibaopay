@@ -66,8 +66,7 @@ deploy-staging:
   environment:
     name: staging
   stage: deploy-staging
-  needs:
-    - deploy-dev
+  needs:    
     - job: push-k8s-template
       artifacts: true
   only:
