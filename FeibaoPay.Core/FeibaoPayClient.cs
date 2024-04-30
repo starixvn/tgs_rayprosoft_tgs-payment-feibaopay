@@ -194,10 +194,10 @@ public class FeibaoPayClient(
     {
         var gateways = gateWays.Any() ? gateWays.ToArray() : Array.Empty<string>();
 
-        var dict = new Dictionary<string, string?>
+        var dict = new Dictionary<string, object>
         {
             ["merchant_time"] = timeProvider.GetUtcNow().ToUnixTimeSeconds().ToString(),
-            ["gateways"] = JsonSerializer.Serialize(gateways),
+            ["gateways"] = gateways,
         };
 
         var sortDict = dict

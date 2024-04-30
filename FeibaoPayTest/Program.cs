@@ -2,9 +2,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NATS.Client.Core;
 using Tgs.MessageQueue.Nats.Serializers;
 using Tgs.Payment.Clients;
+using Tgs.Payment.FeibaoPay;
 using Tgs.Payment.FeibaoPay.Client;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -36,16 +38,16 @@ var hashKey = "a8ec90c269c3bd8812739a4d710bbb85";
 var hashIV = "edbeaacdb228dcac";
 
 //代收GCash QR
-var gateway = "gcash_qr";
+//var gateway = "gcash_qr";
 
-var depositSettings = new FeibaoPayDepositSettings(merchant, hashKey, hashIV, Guid.NewGuid(), gateway, null, "4ucmqplxb029", "127.0.0.1");
+//var depositSettings = new FeibaoPayDepositSettings(merchant, hashKey, hashIV, Guid.NewGuid(), gateway, null, "4ucmqplxb029", "127.0.0.1");
 
-var depositReturn = await paymentClient.DepositAsync(
-    "tgs.payment.feibaopay.deposit",
-    200M,
-    JsonSerializer.Serialize(depositSettings, FeibaoPayUtility.SerializerOptions)).ConfigureAwait(false);
+//var depositReturn = await paymentClient.DepositAsync(
+//    "tgs.payment.feibaopay.deposit",
+//    200M,
+//    JsonSerializer.Serialize(depositSettings, FeibaoPayUtility.SerializerOptions)).ConfigureAwait(false);
 
-logger.LogInformation("DepositReturn: {depositReturn}", depositReturn);
+//logger.LogInformation("DepositReturn: {depositReturn}", depositReturn);
 
 //代付
 //var bankCode = "GXCHP";
@@ -59,3 +61,20 @@ logger.LogInformation("DepositReturn: {depositReturn}", depositReturn);
 //logger.LogInformation("WithdrawReturn: {withdrawReturn}", withdrawReturn);
 
 //查詢存款訂單
+
+//錢包餘額Client
+var httpClient = new HttpClient
+{
+    BaseAddress = new Uri("https://api.feibaopay.com")
+};
+
+var client = new FeibaoPayClient(httpClient, new FeibaoPayCryptor(NullLogger<FeibaoPayCryptor>.Instance), TimeProvider.System, NullLogger<FeibaoPayClient>.Instance);
+var balanceReturn = await client.QueryBalanceAsync(
+    "feibaotest",
+    "a8ec90c269c3bd8812739a4d710bbb85",
+    "edbeaacdb228dcac",
+    Array.Empty<string>()).ConfigureAwait(false);
+
+logger.LogInformation("balanceReturn: {balanceReturn}", balanceReturn);
+
+
