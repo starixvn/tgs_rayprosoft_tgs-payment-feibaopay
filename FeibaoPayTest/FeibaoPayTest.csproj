@@ -17,6 +17,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\FeibaoPay.Client\FeibaoPay.Client.csproj" />
+	  <ProjectReference Include="..\FeibaoPay.Core\FeibaoPay.Core.csproj" />
 	</ItemGroup>
 
 </Project>
